@@ -39,10 +39,11 @@ public:
 
     // getters / setters
 
+    TrafficLightPhase getCurrentPhase() { return _currentPhase; }
+
     // typical behaviour methods
     void waitForGreen();
     void simulate();
-    TrafficLightPhase getCurrentPhase();
 
 private:
     // typical behaviour methods
