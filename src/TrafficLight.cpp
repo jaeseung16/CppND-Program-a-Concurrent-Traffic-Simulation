@@ -85,8 +85,7 @@ void TrafficLight::cycleThroughPhases()
         // First cycle
         std::this_thread::sleep_for(std::chrono::milliseconds(uniform_dist(gen)));
         _currentPhase = TrafficLightPhase::green;
-        // TODO: Sends an update method to the message queue using move semantics?
-        _messageQueue.send(std::move(_currentPhase));
+        _messageQueue.send(std::move(TrafficLightPhase::green));
 
         // Delay between two cycles
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -94,8 +93,7 @@ void TrafficLight::cycleThroughPhases()
         // Second cycle
         std::this_thread::sleep_for(std::chrono::milliseconds(uniform_dist(gen)));
         _currentPhase = TrafficLightPhase::red;
-        // TODO: Sends an update method to the message queue using move semantics?
-        _messageQueue.send(std::move(_currentPhase));
+        _messageQueue.send(std::move(TrafficLightPhase::red));
 
         auto now = std::chrono::system_clock::now();
         std::cout << "elapsed " << std::chrono::duration_cast<std::chrono::microseconds>(now - start).count() << " ms" << std::endl;
