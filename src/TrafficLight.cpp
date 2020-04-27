@@ -6,7 +6,6 @@
 
 /* Implementation of class "MessageQueue" */
 
-/* 
 template <typename T>
 T MessageQueue<T>::receive()
 {
@@ -20,8 +19,11 @@ void MessageQueue<T>::send(T &&msg)
 {
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
+    std::lock_guard<std::mutex> uLock(_mutex);
+    _queue.push_back(std::move(msg));
+    _condition.notify_one();
 }
-*/
+
 
 /* Implementation of class "TrafficLight" */
 
@@ -68,6 +70,7 @@ void TrafficLight::cycleThroughPhases()
         std::this_thread::sleep_for(std::chrono::milliseconds(uniform_dist(gen)));
         _currentPhase = TrafficLightPhase::green;
         // TODO: Sends an update method to the message queue using move semantics?
+        _messageQueue.send(std::move(_currentPhase));
 
         // Delay between two cycles
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -76,6 +79,7 @@ void TrafficLight::cycleThroughPhases()
         std::this_thread::sleep_for(std::chrono::milliseconds(uniform_dist(gen)));
         _currentPhase = TrafficLightPhase::red;
         // TODO: Sends an update method to the message queue using move semantics?
+        _messageQueue.send(std::move(_currentPhase));
 
         auto now = std::chrono::system_clock::now();
         std::cout << "elapsed " << std::chrono::duration_cast<std::chrono::microseconds>(now - start).count() << " ms" << std::endl;
