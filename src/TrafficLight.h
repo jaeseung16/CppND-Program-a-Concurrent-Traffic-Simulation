@@ -1,6 +1,7 @@
 #ifndef TRAFFICLIGHT_H
 #define TRAFFICLIGHT_H
 
+#include <memory>
 #include <mutex>
 #include <deque>
 #include <condition_variable>
@@ -61,7 +62,7 @@ private:
 
     std::condition_variable _condition;
     std::mutex _mutex;
-    TrafficLightPhase _currentPhase;
+    std::shared_ptr<TrafficLightPhase> _currentPhase;
 };
 
 #endif

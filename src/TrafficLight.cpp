@@ -2,6 +2,7 @@
 #include <random>
 #include <chrono>
 #include <thread>
+#include <memory>
 #include "TrafficLight.h"
 
 /* Implementation of class "MessageQueue" */
@@ -36,7 +37,7 @@ void MessageQueue<T>::send(T &&msg)
 
 TrafficLight::TrafficLight()
 {
-    _currentPhase = TrafficLightPhase::red;
+    _currentPhase = std::make_shared<TrafficLightPhase>(TrafficLightPhase::red);
 }
 
 void TrafficLight::waitForGreen()
@@ -57,7 +58,7 @@ void TrafficLight::waitForGreen()
 
 TrafficLightPhase TrafficLight::getCurrentPhase()
 {
-    return _currentPhase;
+    return *_currentPhase;
 }
 
 void TrafficLight::simulate()
@@ -84,16 +85,16 @@ void TrafficLight::cycleThroughPhases()
     {
         // First cycle
         std::this_thread::sleep_for(std::chrono::milliseconds(uniform_dist(gen)));
-        _currentPhase = TrafficLightPhase::green;
-        _messageQueue.send(std::move(TrafficLightPhase::green));
+        _currentPhase = std::make_shared<TrafficLightPhase>(TrafficLightPhase::green);
+        _messageQueue.send(std::move(*_currentPhase));
 
         // Delay between two cycles
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         // Second cycle
         std::this_thread::sleep_for(std::chrono::milliseconds(uniform_dist(gen)));
-        _currentPhase = TrafficLightPhase::red;
-        _messageQueue.send(std::move(TrafficLightPhase::red));
+        _currentPhase = std::make_shared<TrafficLightPhase>(TrafficLightPhase::red);
+        _messageQueue.send(std::move(*_currentPhase));
 
         auto now = std::chrono::system_clock::now();
         std::cout << "elapsed " << std::chrono::duration_cast<std::chrono::microseconds>(now - start).count() << " ms" << std::endl;
