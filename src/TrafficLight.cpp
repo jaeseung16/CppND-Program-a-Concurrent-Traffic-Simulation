@@ -37,7 +37,7 @@ void MessageQueue<T>::send(T &&msg)
 
 TrafficLight::TrafficLight()
 {
-    _currentPhase = std::make_shared<TrafficLightPhase>(TrafficLightPhase::red);
+    _currentPhase = TrafficLightPhase::red;
 }
 
 void TrafficLight::waitForGreen()
@@ -58,7 +58,7 @@ void TrafficLight::waitForGreen()
 
 TrafficLightPhase TrafficLight::getCurrentPhase()
 {
-    return *_currentPhase;
+    return _currentPhase;
 }
 
 void TrafficLight::simulate()
@@ -79,26 +79,19 @@ void TrafficLight::cycleThroughPhases()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> uniform_dist(4000, 6000);
 
-    auto start = std::chrono::system_clock::now();
-
     while (true)
     {
-        // First cycle
-        std::this_thread::sleep_for(std::chrono::milliseconds(uniform_dist(gen)));
-        _currentPhase = std::make_shared<TrafficLightPhase>(TrafficLightPhase::green);
-        _messageQueue.send(std::move(*_currentPhase));
+        auto start = std::chrono::system_clock::now();
+        for (auto trafficLightPhase : {TrafficLightPhase::green, TrafficLightPhase::red})
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(uniform_dist(gen)));
+            _currentPhase = trafficLightPhase;
+            _messageQueue.send(std::move(trafficLightPhase));
 
-        // Delay between two cycles
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-        // Second cycle
-        std::this_thread::sleep_for(std::chrono::milliseconds(uniform_dist(gen)));
-        _currentPhase = std::make_shared<TrafficLightPhase>(TrafficLightPhase::red);
-        _messageQueue.send(std::move(*_currentPhase));
-
-        auto now = std::chrono::system_clock::now();
-        std::cout << "elapsed " << std::chrono::duration_cast<std::chrono::microseconds>(now - start).count() << " ms" << std::endl;
-        start = now;
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        auto duration = std::chrono::duration<double>(std::chrono::system_clock::now() - start);
+        std::cout << "TrafficLight #" << (this->_id) << ": the time between two loop cycles = " << duration.count() << " sec" << std::endl;
     }
 
 }
